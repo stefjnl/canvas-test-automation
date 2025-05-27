@@ -94,13 +94,27 @@
 </div>
 
 <script>
-// Check if environment was pre-selected
-document.addEventListener('DOMContentLoaded', function() {
-    const envSelect = document.getElementById('environment-select');
-    if (envSelect.value) {
-        // Trigger change event to enable buttons
-        envSelect.dispatchEvent(new Event('change'));
-    }
-});
-</script>
+    // Check if environment was pre-selected
+    document.addEventListener('DOMContentLoaded', function() {
+        const envSelect = document.getElementById('environment-select');
+        const setupBtn = document.getElementById('setup-btn');
+        const cleanupBtn = document.getElementById('cleanup-btn');
+        
+        // Check if we have a pre-selected environment
+        const selectedEnv = "{{ selected_env or '' }}";
+        
+        if (selectedEnv) {
+            // Set the dropdown value
+            envSelect.value = selectedEnv;
+            // Enable buttons directly
+            setupBtn.disabled = false;
+            cleanupBtn.disabled = false;
+        }
+        
+        // Also trigger change event
+        if (envSelect.value) {
+            envSelect.dispatchEvent(new Event('change'));
+        }
+    });
+    </script>
 {% endblock %}
