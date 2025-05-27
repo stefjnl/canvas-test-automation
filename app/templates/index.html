@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <section class="environment-selector">
+        <h2>🚀 Select Test Environment</h2>
+        <select id="environment-select" class="environment-select">
+            <option value="" selected>Choose environment...</option>
+            <option value="acceptatie">Acceptatie</option>
+            <option value="test">TEST</option>
+            <option value="development">Development</option>
+        </select>
+    </section>
+    
+    <section class="menu-items">
+        <h2>📋 Test Configuration Menu</h2>
+        <div class="menu-grid">
+            <div class="menu-item">
+                <div class="menu-header">
+                    <h3>🏛️ Account Structure</h3>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="create-subaccounts">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="menu-content" id="subaccounts-config" style="display: none;">
+                    <div class="subaccount-list" id="subaccount-list">
+                        <div class="subaccount-item">
+                            <input type="text" class="subaccount-name" placeholder="e.g., Faculty of Science" value="Test Faculty">
+                            <button class="btn-icon remove-subaccount" style="display: none;">×</button>
+                        </div>
+                    </div>
+                    <button class="btn-secondary add-subaccount">+ Add Subaccount</button>
+                </div>
+            </div>
+            
+            <div class="menu-item">
+                <div class="menu-header">
+                    <h3>📚 Courses</h3>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="create-courses">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="menu-content" id="courses-config" style="display: none;">
+                    <div class="course-list" id="course-list">
+                        <div class="course-item">
+                            <input type="text" class="course-name" placeholder="Course name" value="Introduction to Testing">
+                            <input type="text" class="course-code" placeholder="Course code" value="TEST101">
+                            <button class="btn-icon remove-course" style="display: none;">×</button>
+                        </div>
+                    </div>
+                    <button class="btn-secondary add-course">+ Add Course</button>
+                </div>
+            </div>
+            
+            <div class="menu-item">
+                <div class="menu-header">
+                    <h3>👥 Users</h3>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="create-users" disabled>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="menu-content">
+                    <p class="coming-soon">Coming soon!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="actions">
+        <button id="setup-btn" class="btn-primary" disabled>
+            <span class="btn-text">Set Up Environment</span>
+            <span class="spinner" style="display: none;"></span>
+        </button>
+        <button id="cleanup-btn" class="btn-danger" disabled>
+            <span class="btn-text">Clean Up Environment</span>
+            <span class="spinner" style="display: none;"></span>
+        </button>
+    </section>
+    
+    <section class="results" id="results" style="display: none;">
+        <h2>✅ Results</h2>
+        <div id="results-content"></div>
+    </section>
+</div>
+{% endblock %}

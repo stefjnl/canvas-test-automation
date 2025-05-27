@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <section class="environment-selector">
+        <h2>Select Test Environment</h2>
+        <select id="environment-select">
+            <option value="">Choose environment...</option>
+            <option value="acceptatie">Acceptatie</option>
+            <option value="tes">TES</option>
+            <option value="development">Development</option>
+        </select>
+    </section>
+    
+    <section class="menu-items">
+        <h2>Test Configuration Menu</h2>
+        <div class="menu-grid">
+            <div class="menu-item">
+                <h3>Account Structure</h3>
+                <label>
+                    <input type="checkbox" id="create-subaccounts">
+                    Create subaccount tree
+                </label>
+            </div>
+            
+            <div class="menu-item">
+                <h3>Courses</h3>
+                <label>
+                    <input type="checkbox" id="create-courses">
+                    Create test courses
+                </label>
+                <input type="number" id="course-count" placeholder="Number of courses" min="1" max="10">
+            </div>
+            
+            <div class="menu-item">
+                <h3>Users</h3>
+                <label>
+                    <input type="checkbox" id="create-users">
+                    Create test users
+                </label>
+            </div>
+        </div>
+    </section>
+    
+    <section class="actions">
+        <button id="setup-btn" class="btn-primary">Set Up Environment</button>
+        <button id="cleanup-btn" class="btn-danger">Clean Up Environment</button>
+    </section>
+    
+    <section class="results" id="results" style="display: none;">
+        <h2>Results</h2>
+        <div id="results-content"></div>
+    </section>
+</div>
+{% endblock %}
