@@ -5,11 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Canvas Test Automation - UvA DLO</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 </head>
 <body>
     <header>
         <h1>Canvas Test Environment Manager</h1>
         <p>UvA DLO Product Team</p>
+        <nav>
+            <a href="/" class="nav-link">Dashboard</a>
+            <a href="/setup" class="nav-link">Setup Environment</a>
+        </nav>
     </header>
     
     <main>
@@ -17,7 +22,7 @@
     </main>
     
     <footer>
-        <p>&copy; 2025 UvA DLO PT</p>
+        <p>&copy; 2025 UvA DLO</p>
     </footer>
     
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>

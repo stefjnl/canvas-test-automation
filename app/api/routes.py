@@ -75,3 +75,19 @@ def cleanup_environment():
         
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+    
+@api_bp.route('/environments/<env>/status', methods=['GET'])
+def get_environment_status(env):
+    """Get status of a specific environment"""
+    try:
+        # TODO: Implement actual Canvas API calls to check status
+        # For now, return mock data
+        return jsonify({
+            "environment": env,
+            "subaccounts": 0,
+            "courses": 0,
+            "lastActivity": None,
+            "status": "clean"
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400

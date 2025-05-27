@@ -2,15 +2,22 @@
 
 {% block content %}
 <div class="container">
-    <section class="environment-selector">
+    <section class="environment-selector" {% if selected_env %}style="display: none;"{% endif %}>
         <h2>🚀 Select Test Environment</h2>
         <select id="environment-select" class="environment-select">
-            <option value="" selected>Choose environment...</option>
-            <option value="acceptatie">Acceptatie</option>
-            <option value="test">TEST</option>
-            <option value="development">Development</option>
+            <option value="" {% if not selected_env %}selected{% endif %}>Choose environment...</option>
+            <option value="acceptatie" {% if selected_env == 'acceptatie' %}selected{% endif %}>Acceptatie</option>
+            <option value="test" {% if selected_env == 'test' %}selected{% endif %}>Test</option>
+            <option value="development" {% if selected_env == 'development' %}selected{% endif %}>Development</option>
         </select>
     </section>
+    
+    {% if selected_env %}
+    <section class="environment-header">
+        <h2>🚀 Setting up: {{ selected_env|title }}</h2>
+        <a href="/" class="btn-secondary">← Back to Dashboard</a>
+    </section>
+    {% endif %}
     
     <section class="menu-items">
         <h2>📋 Test Configuration Menu</h2>
@@ -85,4 +92,15 @@
         <div id="results-content"></div>
     </section>
 </div>
+
+<script>
+// Check if environment was pre-selected
+document.addEventListener('DOMContentLoaded', function() {
+    const envSelect = document.getElementById('environment-select');
+    if (envSelect.value) {
+        // Trigger change event to enable buttons
+        envSelect.dispatchEvent(new Event('change'));
+    }
+});
+</script>
 {% endblock %}

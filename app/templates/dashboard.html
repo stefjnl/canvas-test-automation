@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <section class="dashboard-header">
+        <h2>🎯 Environment Overview</h2>
+        <p>Manage your Canvas test environments from one place</p>
+    </section>
+    
+    <section class="environments-grid">    
+        <div class="env-card" data-env="development">
+            <div class="env-header">
+                <h3>Development</h3>
+                <span class="env-status status-unknown">
+                    <span class="status-dot"></span>
+                    Checking...
+                </span>
+            </div>
+            <div class="env-info">
+                <div class="info-item">
+                    <span class="info-label">Subaccounts:</span>
+                    <span class="info-value" id="development-subaccounts">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Courses:</span>
+                    <span class="info-value" id="development-courses">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Last Activity:</span>
+                    <span class="info-value" id="development-activity">-</span>
+                </div>
+            </div>
+            <div class="env-actions">
+                <button class="btn-small btn-primary" onclick="window.location.href='/setup?env=development'">
+                    Setup
+                </button>
+                <button class="btn-small btn-secondary" onclick="viewDetails('development')">
+                    View Details
+                </button>
+                <button class="btn-small btn-danger" onclick="cleanupEnvironment('development')">
+                    Cleanup
+                </button>
+            </div>
+        </div>
+        
+        <div class="env-card" data-env="test">
+            <div class="env-header">
+                <h3>Test</h3>
+                <span class="env-status status-unknown">
+                    <span class="status-dot"></span>
+                    Checking...
+                </span>
+            </div>
+            <div class="env-info">
+                <div class="info-item">
+                    <span class="info-label">Subaccounts:</span>
+                    <span class="info-value" id="test-subaccounts">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Courses:</span>
+                    <span class="info-value" id="test-courses">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Last Activity:</span>
+                    <span class="info-value" id="test-activity">-</span>
+                </div>
+            </div>
+            <div class="env-actions">
+                <button class="btn-small btn-primary" onclick="window.location.href='/setup?env=test'">
+                    Setup
+                </button>
+                <button class="btn-small btn-secondary" onclick="viewDetails('test')">
+                    View Details
+                </button>
+                <button class="btn-small btn-danger" onclick="cleanupEnvironment('test')">
+                    Cleanup
+                </button>
+            </div>
+        </div>
+
+        <div class="env-card" data-env="acceptatie">
+            <div class="env-header">
+                <h3>Acceptatie</h3>
+                <span class="env-status status-unknown">
+                    <span class="status-dot"></span>
+                    Checking...
+                </span>
+            </div>
+            <div class="env-info">
+                <div class="info-item">
+                    <span class="info-label">Subaccounts:</span>
+                    <span class="info-value" id="acceptatie-subaccounts">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Courses:</span>
+                    <span class="info-value" id="acceptatie-courses">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Last Activity:</span>
+                    <span class="info-value" id="acceptatie-activity">-</span>
+                </div>
+            </div>
+            <div class="env-actions">
+                <button class="btn-small btn-primary" onclick="window.location.href='/setup?env=acceptatie'">
+                    Setup
+                </button>
+                <button class="btn-small btn-secondary" onclick="viewDetails('acceptatie')">
+                    View Details
+                </button>
+                <button class="btn-small btn-danger" onclick="cleanupEnvironment('acceptatie')">
+                    Cleanup
+                </button>
+            </div>
+        </div>
+    </section>
+    
+    <section class="recent-activity">
+        <h3>📊 Recent Activity</h3>
+        <div id="activity-log">
+            <p class="no-activity">No recent activity to display</p>
+        </div>
+    </section>
+</div>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
