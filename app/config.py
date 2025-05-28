@@ -1,7 +1,14 @@
 import os
+import logging
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key')
@@ -11,6 +18,6 @@ class Config:
     # Test environments
     TEST_ENVIRONMENTS = {
         'acceptatie': os.getenv('TEST_ENV_ACCEPTATIE'),
-        'tes': os.getenv('TEST_ENV_TES'),
+        'test': os.getenv('TEST_ENV_TEST'),
         'development': os.getenv('TEST_ENV_DEVELOPMENT')
     }
