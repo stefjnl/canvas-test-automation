@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.api.canvas_client import CanvasClient
 from app.models.schemas import TestEnvironmentConfig
+from datetime import datetime
 import logging
 
 logger = logging.getLogger(__name__)
@@ -231,3 +232,150 @@ def setup_scenario(scenario_id):
     except Exception as e:
         logger.error(f"Scenario setup failed: {e}")
         return jsonify({"error": str(e)}), 400
+    
+@api_bp.route('/submit-request', methods=['POST'])
+def submit_request():
+    """Submit a new test environment request"""
+    try:
+        data = request.json
+        logger.info(f"New request from {data.get('requester')}")
+        
+        # In a real implementation, you would:
+        # 1. Save this to a database
+        # 2. Send email notifications
+        # 3. Create a Topdesk ticket
+        # 4. Log to a tracking system
+        
+        # For now, we'll process it immediately
+        client = CanvasClient()
+        results = {
+            "request_id": f"REQ-{datetime.now().strftime('%Y%m%d%H%M%S')}",
+            "status": "processing",
+            "created_resources": {
+                "subaccounts": [],
+                "courses": [],
+                "users": [],
+                "errors": []
+            }
+        }
+        
+        # Create subaccount if requested
+        if data['subaccount']['create']:
+            try:
+                subaccount = client.create_subaccount(
+                    parent_id=1,  # Root account
+                    name=data['subaccount']['name']
+                )
+                results['created_resources']['subaccounts'].append(subaccount)
+                account_id = subaccount['id']
+            except Exception as e:
+                results['created_resources']['errors'].append(f"Failed to create subaccount: {str(e)}")
+                account_id = 1  # Fallback to root
+        else:
+            account_id = 1
+        
+        # Create admin access
+        for admin_user in data['admin_users']:
+            # In real implementation, grant admin access to the users
+            logger.info(f"Would grant admin access to {admin_user}")
+        
+        # Create courses
+        for course_config in data['courses']:
+            try:
+                # Create course
+                course = client.create_course(
+                    account_id=account_id,
+                    name=course_config['name'],
+                    course_code=f"TEST-{datetime.now().strftime('%Y%m%d')}"
+                )
+                results['created_resources']['courses'].append(course)
+                
+                # Create sections if more than 1
+                if course_config['sections'] > 1:
+                    for i in range(2, course_config['sections'] + 1):
+                        # Canvas API for creating sections
+                        logger.info(f"Would create section {i} for course {course['id']}")
+                
+                # Create test users
+                created_users = []
+                for i in range(course_config['students']):
+                    user = client.create_user(
+                        account_id=account_id,
+                        name=f"Test Student {i+1}",
+                        email=f"teststudent{i+1}@test.uva.nl",
+                        login_id=f"tstudent{i+1}"
+                    )
+                    created_users.append(user)
+                    results['created_resources']['users'].append(user)
+                    
+                    # Enroll in course
+                    client.enroll_user(
+                        course_id=course['id'],
+                        user_id=user['id'],
+                        role='StudentEnrollment'
+                    )
+                
+                # Create teachers
+                for i in range(course_config['teachers']):
+                    user = client.create_user(
+                        account_id=account_id,
+                        name=f"Test Teacher {i+1}",
+                        email=f"testteacher{i+1}@test.uva.nl",
+                        login_id=f"tteacher{i+1}"
+                    )
+                    results['created_resources']['users'].append(user)
+                    
+                    # Enroll as teacher
+                    client.enroll_user(
+                        course_id=course['id'],
+                        user_id=user['id'],
+                        role='TeacherEnrollment'
+                    )
+                    
+            except Exception as e:
+                results['created_resources']['errors'].append(f"Failed to create course {course_config['name']}: {str(e)}")
+        
+        # Handle additional options
+        if data['options']['configure_terms']:
+            logger.info("Would configure terms")
+        
+        if data['options']['add_apps']:
+            for app_name in data['options']['app_names']:
+                logger.info(f"Would configure app: {app_name}")
+        
+        # Store request details for tracking
+        # In real implementation, save to database
+        store_request_details(data, results)
+        
+        results['status'] = 'completed'
+        return jsonify(results), 200
+        
+    except Exception as e:
+        logger.error(f"Request submission failed: {e}")
+        return jsonify({"error": str(e)}), 400
+
+def store_request_details(request_data, results):
+    """Store request details for tracking and cleanup"""
+    # In a real implementation, this would save to a database
+    # For now, we'll use a simple JSON file
+    import json
+    from datetime import datetime
+    
+    request_record = {
+        "id": results['request_id'],
+        "timestamp": datetime.now().isoformat(),
+        "request": request_data,
+        "results": results
+    }
+    
+    # Save to file (in production, use a database)
+    try:
+        with open('request_log.json', 'r') as f:
+            log = json.load(f)
+    except:
+        log = []
+    
+    log.append(request_record)
+    
+    with open('request_log.json', 'w') as f:
+        json.dump(log, f, indent=2)

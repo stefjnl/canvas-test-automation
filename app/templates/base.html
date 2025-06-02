@@ -1,19 +1,22 @@
 <!DOCTYPE html>
 <html lang="nl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canvas Test Automation - UvA DLO</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Canvas Test Automation - UvA DLO</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/cleanup.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/request.css') }}">
+    </head>
 <body>
     <header>
         <h1>Canvas Test Environment Manager</h1>
         <p>UvA DLO Product Team</p>
         <nav>
             <a href="/" class="nav-link">Dashboard</a>
-            <a href="/setup" class="nav-link">Setup Environment</a>
+            <a href="/request" class="nav-link">New Request</a>
+            <a href="/setup" class="nav-link">Quick Setup</a>
         </nav>
     </header>
     

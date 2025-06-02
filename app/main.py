@@ -20,6 +20,10 @@ def setup():
     env = request.args.get('env', '')
     return render_template('index.html', selected_env=env)
 
+@app.route('/request')
+def new_request():
+    return render_template('request.html')
+
 @app.errorhandler(404)
 def not_found(error):
     return {"error": "Resource not found"}, 404
