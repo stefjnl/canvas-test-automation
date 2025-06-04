@@ -117,3 +117,7 @@ function cleanupEnvironment(environment) {
         alert(`Cleanup ${environment} - Coming soon!`);
     }
 }
+
+function viewRequests(environment) {
+    window.location.href = `/requests?env=${environment}`;
+}

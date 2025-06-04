@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <section class="requests-header">
+        <h2>📋 Test Environment Requests</h2>
+        <p>Manage active test configurations</p>
+    </section>
+
+    <section class="requests-list">
+        <div class="filters">
+            <select id="env-filter">
+                <option value="">All Environments</option>
+                <option value="development">Development</option>
+                <option value="test">Test</option>
+                <option value="acceptatie">Acceptatie</option>
+            </select>
+            <select id="status-filter">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="expired">Expired</option>
+                <option value="cleaned">Cleaned</option>
+            </select>
+        </div>
+
+        <div class="requests-grid" id="requests-grid">
+            <!-- Dynamically populated -->
+        </div>
+    </section>
+</div>
+
+<script src="{{ url_for('static', filename='js/requests.js') }}"></script>
+{% endblock %}
