@@ -5,3 +5,4 @@ requests==2.31.0
 pydantic==2.8.2
 pytest==7.4.0
 canvasapi>=3.3.0
+gunicorn>=21.0
