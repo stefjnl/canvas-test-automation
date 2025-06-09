@@ -1,0 +1,94 @@
+.requests-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.filters select {
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+}
+
+.requests-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.request-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s;
+}
+
+.request-card.active {
+    border-color: #10b981;
+}
+
+.request-card.expired {
+    border-color: #f59e0b;
+    opacity: 0.9;
+}
+
+.request-card.cleaned {
+    border-color: #6b7280;
+    opacity: 0.7;
+}
+
+.request-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.request-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.status-active {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.status-expired {
+    background-color: #fed7aa;
+    color: #92400e;
+}
+
+.status-cleaned {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+.request-info p {
+    margin: 0.5rem 0;
+}
+
+.request-info ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.request-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.no-requests {
+    text-align: center;
+    color: #6b7280;
+    padding: 3rem;
+}

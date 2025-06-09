@@ -1,12 +1,76 @@
 from flask import Blueprint, request, jsonify
 from app.api.canvas_client import CanvasClient
-from app.models.schemas import TestEnvironmentConfig
+from app.models.schemas import TestEnvironmentConfig, TestEnvironmentRequest
 from datetime import datetime
 import logging
+import json
+import os
+import uuid
 
 logger = logging.getLogger(__name__)
+
+# Define Blueprint FIRST
 api_bp = Blueprint('api', __name__)
 
+# Helper functions for request management
+def get_requests_file():
+    return os.path.join(os.path.dirname(__file__), '..', 'data', 'requests.json')
+
+def load_requests():
+    """Load all requests from storage"""
+    try:
+        with open(get_requests_file(), 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return []
+
+def save_requests(requests):
+    """Save requests to storage"""
+    os.makedirs(os.path.dirname(get_requests_file()), exist_ok=True)
+    with open(get_requests_file(), 'w') as f:
+        json.dump(requests, f, indent=2)
+
+def find_request(request_id):
+    """Find a specific request by ID"""
+    requests = load_requests()
+    for req in requests:
+        if req['id'] == request_id:
+            return req
+    return None
+
+def get_scenario_name(scenario_id):
+    """Get friendly name for scenario"""
+    names = {
+        'app-integration': 'App Integration Test',
+        'department-structure': 'Department Structure',
+        'bulk-testing': 'Bulk User Testing',
+        'assignment-workflow': 'Assignment Workflow',
+        'custom': 'Custom Setup'
+    }
+    return names.get(scenario_id, scenario_id)
+
+def store_request_details(request_data, results):
+    """Store request details for tracking and cleanup"""
+    request_record = {
+        "id": results['request_id'],
+        "timestamp": datetime.now().isoformat(),
+        "request": request_data,
+        "results": results
+    }
+    
+    # Save to file (in production, use a database)
+    try:
+        with open('request_log.json', 'r') as f:
+            log = json.load(f)
+    except:
+        log = []
+    
+    log.append(request_record)
+    
+    with open('request_log.json', 'w') as f:
+        json.dump(log, f, indent=2)
+
+# Routes
 @api_bp.route('/health', methods=['GET'])
 def health_check():
     return jsonify({"status": "healthy"}), 200
@@ -146,34 +210,34 @@ def get_test_scenarios():
     """Get predefined test scenarios (menukaart)"""
     scenarios = [
         {
-            "id": "basic_course",
-            "name": "Basic Course Setup",
-            "description": "Single course with 5 students and 1 teacher",
-            "icon": "📚"
+            "id": "app-integration",
+            "name": "App Integration Test",
+            "description": "Test LTI tools like Peerceptiv, Turnitin, or custom apps",
+            "icon": "🔌"
         },
         {
-            "id": "department_structure",
+            "id": "department-structure",
             "name": "Department Structure",
-            "description": "Faculty → Department → 3 Courses hierarchy",
+            "description": "Create realistic faculty/department hierarchy",
             "icon": "🏛️"
         },
         {
-            "id": "assignment_workflow",
+            "id": "bulk-testing",
+            "name": "Bulk User Testing",
+            "description": "Test with many students and complex enrollments",
+            "icon": "👥"
+        },
+        {
+            "id": "assignment-workflow",
             "name": "Assignment Workflow Test",
-            "description": "Course with assignments, rubrics, and test submissions",
+            "description": "Test grading, rubrics, and submissions",
             "icon": "📝"
         },
         {
-            "id": "multi_term",
-            "name": "Multi-Term Setup",
-            "description": "Courses across different academic terms",
-            "icon": "📅"
-        },
-        {
-            "id": "role_testing",
-            "name": "Role & Permission Testing",
-            "description": "Users with various roles and custom permissions",
-            "icon": "👥"
+            "id": "custom",
+            "name": "Custom Setup",
+            "description": "Configure everything manually",
+            "icon": "⚙️"
         }
     ]
     return jsonify(scenarios), 200
@@ -232,32 +296,98 @@ def setup_scenario(scenario_id):
     except Exception as e:
         logger.error(f"Scenario setup failed: {e}")
         return jsonify({"error": str(e)}), 400
+
+@api_bp.route('/requests', methods=['GET'])
+def get_requests():
+    """Get all test environment requests"""
+    requests = load_requests()
+    # Sort by created date, newest first
+    requests.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+    return jsonify(requests), 200
+
+@api_bp.route('/requests/<request_id>', methods=['GET'])
+def get_request(request_id):
+    """Get a specific request"""
+    request = find_request(request_id)
+    if request:
+        return jsonify(request), 200
+    return jsonify({"error": "Request not found"}), 404
+
+@api_bp.route('/requests/<request_id>/cleanup', methods=['POST'])
+def cleanup_request(request_id):
+    """Cleanup all resources created by a specific request"""
+    request_obj = find_request(request_id)
+    if not request_obj:
+        return jsonify({"error": "Request not found"}), 404
     
+    if request_obj.get('cleaned'):
+        return jsonify({"error": "Request already cleaned up"}), 400
+    
+    client = CanvasClient()
+    results = {
+        "deleted_courses": 0,
+        "deleted_users": 0,
+        "errors": []
+    }
+    
+    # Delete courses
+    for course in request_obj['created_resources'].get('courses', []):
+        try:
+            client.delete_course(course['id'])
+            results['deleted_courses'] += 1
+            logger.info(f"Deleted course {course['id']} from request {request_id}")
+        except Exception as e:
+            error_msg = f"Failed to delete course {course['id']}: {str(e)}"
+            logger.error(error_msg)
+            results['errors'].append(error_msg)
+    
+    # Note: Canvas doesn't allow deleting users via API
+    # We'll mark them as deleted in our tracking
+    results['deleted_users'] = len(request_obj['created_resources'].get('users', []))
+    
+    # Update request status
+    requests = load_requests()
+    for req in requests:
+        if req['id'] == request_id:
+            req['cleaned'] = True
+            req['cleaned_at'] = datetime.now().isoformat()
+            req['cleanup_results'] = results
+            break
+    save_requests(requests)
+    
+    return jsonify(results), 200
+
 @api_bp.route('/submit-request', methods=['POST'])
 def submit_request():
     """Submit a new test environment request"""
     try:
         data = request.json
-        logger.info(f"New request from {data.get('requester')}")
         
-        # In a real implementation, you would:
-        # 1. Save this to a database
-        # 2. Send email notifications
-        # 3. Create a Topdesk ticket
-        # 4. Log to a tracking system
+        # Generate unique request ID
+        request_id = f"REQ-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{str(uuid.uuid4())[:8]}"
         
-        # For now, we'll process it immediately
-        client = CanvasClient()
-        results = {
-            "request_id": f"REQ-{datetime.now().strftime('%Y%m%d%H%M%S')}",
-            "status": "processing",
+        # Create request record
+        request_record = {
+            "id": request_id,
+            "created_at": datetime.now().isoformat(),
+            "scenario": data.get('scenario'),
+            "scenario_name": get_scenario_name(data.get('scenario')),
+            "requester": data.get('requester'),
+            "topdesk_number": data.get('topdesk_number'),
+            "environment": data.get('environment'),
+            "start_date": data.get('start_date'),
+            "end_date": data.get('end_date'),
+            "request_data": data,
             "created_resources": {
                 "subaccounts": [],
                 "courses": [],
                 "users": [],
                 "errors": []
-            }
+            },
+            "cleaned": False
         }
+        
+        client = CanvasClient()
         
         # Create subaccount if requested
         if data['subaccount']['create']:
@@ -266,11 +396,11 @@ def submit_request():
                     parent_id=1,  # Root account
                     name=data['subaccount']['name']
                 )
-                results['created_resources']['subaccounts'].append(subaccount)
+                request_record['created_resources']['subaccounts'].append(subaccount)
                 account_id = subaccount['id']
             except Exception as e:
-                results['created_resources']['errors'].append(f"Failed to create subaccount: {str(e)}")
-                account_id = 1  # Fallback to root
+                request_record['created_resources']['errors'].append(f"Failed to create subaccount: {str(e)}")
+                account_id = 1
         else:
             account_id = 1
         
@@ -279,16 +409,16 @@ def submit_request():
             # In real implementation, grant admin access to the users
             logger.info(f"Would grant admin access to {admin_user}")
         
-        # Create courses
+        # Create courses and users
         for course_config in data['courses']:
             try:
                 # Create course
                 course = client.create_course(
                     account_id=account_id,
                     name=course_config['name'],
-                    course_code=f"TEST-{datetime.now().strftime('%Y%m%d')}"
+                    course_code=f"TEST-{request_id[-8:]}"
                 )
-                results['created_resources']['courses'].append(course)
+                request_record['created_resources']['courses'].append(course)
                 
                 # Create sections if more than 1
                 if course_config['sections'] > 1:
@@ -296,17 +426,15 @@ def submit_request():
                         # Canvas API for creating sections
                         logger.info(f"Would create section {i} for course {course['id']}")
                 
-                # Create test users
-                created_users = []
+                # Create test students
                 for i in range(course_config['students']):
                     user = client.create_user(
                         account_id=account_id,
-                        name=f"Test Student {i+1}",
-                        email=f"teststudent{i+1}@test.uva.nl",
-                        login_id=f"tstudent{i+1}"
+                        name=f"Test Student {i+1} ({request_id[-8:]})",
+                        email=f"test.student{i+1}.{request_id[-8:]}@test.uva.nl",
+                        login_id=f"tstudent{i+1}_{request_id[-8:]}"
                     )
-                    created_users.append(user)
-                    results['created_resources']['users'].append(user)
+                    request_record['created_resources']['users'].append(user)
                     
                     # Enroll in course
                     client.enroll_user(
@@ -319,11 +447,11 @@ def submit_request():
                 for i in range(course_config['teachers']):
                     user = client.create_user(
                         account_id=account_id,
-                        name=f"Test Teacher {i+1}",
-                        email=f"testteacher{i+1}@test.uva.nl",
-                        login_id=f"tteacher{i+1}"
+                        name=f"Test Teacher {i+1} ({request_id[-8:]})",
+                        email=f"test.teacher{i+1}.{request_id[-8:]}@test.uva.nl",
+                        login_id=f"tteacher{i+1}_{request_id[-8:]}"
                     )
-                    results['created_resources']['users'].append(user)
+                    request_record['created_resources']['users'].append(user)
                     
                     # Enroll as teacher
                     client.enroll_user(
@@ -333,7 +461,7 @@ def submit_request():
                     )
                     
             except Exception as e:
-                results['created_resources']['errors'].append(f"Failed to create course {course_config['name']}: {str(e)}")
+                request_record['created_resources']['errors'].append(f"Failed to create course {course_config['name']}: {str(e)}")
         
         # Handle additional options
         if data['options']['configure_terms']:
@@ -343,39 +471,24 @@ def submit_request():
             for app_name in data['options']['app_names']:
                 logger.info(f"Would configure app: {app_name}")
         
-        # Store request details for tracking
-        # In real implementation, save to database
-        store_request_details(data, results)
+        # Save request record
+        requests = load_requests()
+        requests.append(request_record)
+        save_requests(requests)
         
-        results['status'] = 'completed'
-        return jsonify(results), 200
+        # Also store in old format for compatibility
+        store_request_details(data, {
+            "request_id": request_id,
+            "status": "completed",
+            "created_resources": request_record['created_resources']
+        })
+        
+        return jsonify({
+            "request_id": request_id,
+            "status": "completed",
+            "created_resources": request_record['created_resources']
+        }), 200
         
     except Exception as e:
         logger.error(f"Request submission failed: {e}")
         return jsonify({"error": str(e)}), 400
-
-def store_request_details(request_data, results):
-    """Store request details for tracking and cleanup"""
-    # In a real implementation, this would save to a database
-    # For now, we'll use a simple JSON file
-    import json
-    from datetime import datetime
-    
-    request_record = {
-        "id": results['request_id'],
-        "timestamp": datetime.now().isoformat(),
-        "request": request_data,
-        "results": results
-    }
-    
-    # Save to file (in production, use a database)
-    try:
-        with open('request_log.json', 'r') as f:
-            log = json.load(f)
-    except:
-        log = []
-    
-    log.append(request_record)
-    
-    with open('request_log.json', 'w') as f:
-        json.dump(log, f, indent=2)
