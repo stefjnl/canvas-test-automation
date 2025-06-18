@@ -31,39 +31,32 @@ def verify_password(username, password):
 # Register blueprints
 app.register_blueprint(api_bp, url_prefix='/api')
 
-# Apply auth to all routes
 @app.before_request
-@auth.login_required
 def require_login():
-    # Skip auth for static files
-    if request.path.startswith('/static'):
-        return None
+    # Completely disable auth for now
     return None
 
 # Routes
 @app.route('/')
-@auth.login_required
 def dashboard():
     return render_template('dashboard.html')
 
 @app.route('/setup')
-@auth.login_required
+
 def setup():
     env = request.args.get('env', '')
     return render_template('index.html', selected_env=env)
 
 @app.route('/request')
-@auth.login_required
 def new_request():
     return render_template('request.html')
 
 @app.route('/requests')
-@auth.login_required
 def requests_list():
     return render_template('requests_list.html')
 
 @app.route('/request/<request_id>')
-@auth.login_required
+
 def request_details(request_id):
     return redirect(url_for('requests_list'))
 

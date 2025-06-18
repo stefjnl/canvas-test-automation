@@ -9,16 +9,36 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='css/cleanup.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/request.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/requests.css') }}">
+            {% if lti_mode %}
+    <style>
+        /* Adjust styling for LTI iframe */
+        body {
+            background: white;
+        }
+        header {
+            padding: 1rem;
+        }
+        .container {
+            margin: 1rem auto;
+        }
+    </style>
+    {% endif %}
     </head>
-<body>
+<body class="{% if lti_mode %}lti-mode{% endif %}">
     <header>
         <h1>Canvas Test Environment Manager</h1>
         <p>UvA DLO Product Team</p>
+                {% if lti_mode %}
+        <p class="lti-user">👤 {{ user_name }}</p>
+        {% endif %}
         <nav>
             <a href="/" class="nav-link">Dashboard</a>
             <a href="/request" class="nav-link">New Request</a>
             <a href="/setup" class="nav-link">Quick Setup</a>
             <a href="/requests" class="nav-link">Requests Overview</a>
+            {% if lti_mode %}
+            <a href="/lti/close" class="nav-link">Return to Canvas</a>
+            {% endif %}
         </nav>
     </header>
     

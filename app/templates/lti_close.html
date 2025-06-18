@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Closing...</title>
+    <script>
+        // Close the window or redirect back to Canvas
+        if (window.parent !== window) {
+            // We're in an iframe
+            window.parent.postMessage({subject: 'lti.close'}, '*');
+        } else {
+            // Try to close the window
+            window.close();
+            // If that doesn't work, show a message
+            setTimeout(() => {
+                document.body.innerHTML = '<p>You can close this window and return to Canvas.</p>';
+            }, 100);
+        }
+    </script>
+</head>
+<body>
+    <p>Returning to Canvas...</p>
+</body>
+</html>
