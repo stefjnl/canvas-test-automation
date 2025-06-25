@@ -34,8 +34,7 @@ def check_lti_session():
     """Check if user has valid LTI session"""
     return session.get('lti_launch', False)
 
-# Add this after app creation
-@app.before_first_request
+# Setup LTI config using the new Flask pattern
 def setup_lti_config():
     """Ensure LTI config exists on Railway"""
     try:
@@ -57,10 +56,9 @@ def setup_lti_config():
     except Exception as e:
         print(f"LTI setup error: {e}")
 
-#@app.before_request
-#def require_login():
-    # Completely disable auth for now
-    #return None
+# Run setup when app starts
+with app.app_context():
+    setup_lti_config()
 
 # Routes
 @app.route('/health')
