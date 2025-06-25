@@ -41,18 +41,23 @@ def setup_lti_config():
         from app.lti.config import LTIConfig
         import os
         
-        # Only create if it doesn't exist
         config_path = LTIConfig.get_lti_config_path()
-        if not os.path.exists(config_path):
-            LTIConfig.setup_lti_config(
-                client_id='104400000000000323',
-                deployment_id='EFkkYVAH4rEUxG9nUntayfyXD6BA6a6xfAHz7URF7WDtPfUBkxQ69yThQDPBANkm',
-                platform_url='https://uvadlo-dev.instructure.com',
-                auth_url='https://uvadlo-dev.instructure.com/api/lti/authorize_redirect',
-                token_url='https://uvadlo-dev.instructure.com/login/oauth2/token',
-                jwks_url='https://uvadlo-dev.instructure.com/api/lti/security/jwks'
-            )
-            print("LTI config created on Railway!")
+        
+        # Force delete and recreate to fix paths
+        if os.path.exists(config_path):
+            os.remove(config_path)
+            print("Deleted old LTI config with bad paths")
+        
+        # Always create new config with correct paths
+        LTIConfig.setup_lti_config(
+            client_id='104400000000000323',
+            deployment_id='EFkkYVAH4rEUxG9nUntayfyXD6BA6a6xfAHz7URF7WDtPfUBkxQ69yThQDPBANkm',
+            platform_url='https://uvadlo-dev.instructure.com',
+            auth_url='https://uvadlo-dev.instructure.com/api/lti/authorize_redirect',
+            token_url='https://uvadlo-dev.instructure.com/login/oauth2/token',
+            jwks_url='https://uvadlo-dev.instructure.com/api/lti/security/jwks'
+        )
+        print("LTI config created with correct paths!")
     except Exception as e:
         print(f"LTI setup error: {e}")
 
