@@ -34,10 +34,33 @@ def check_lti_session():
     """Check if user has valid LTI session"""
     return session.get('lti_launch', False)
 
-@app.before_request
-def require_login():
+# Add this after app creation
+@app.before_first_request
+def setup_lti_config():
+    """Ensure LTI config exists on Railway"""
+    try:
+        from app.lti.config import LTIConfig
+        import os
+        
+        # Only create if it doesn't exist
+        config_path = LTIConfig.get_lti_config_path()
+        if not os.path.exists(config_path):
+            LTIConfig.setup_lti_config(
+                client_id='104400000000000323',
+                deployment_id='EFkkYVAH4rEUxG9nUntayfyXD6BA6a6xfAHz7URF7WDtPfUBkxQ69yThQDPBANkm',
+                platform_url='https://uvadlo-dev.instructure.com',
+                auth_url='https://uvadlo-dev.instructure.com/api/lti/authorize_redirect',
+                token_url='https://uvadlo-dev.instructure.com/login/oauth2/token',
+                jwks_url='https://uvadlo-dev.instructure.com/api/lti/security/jwks'
+            )
+            print("LTI config created on Railway!")
+    except Exception as e:
+        print(f"LTI setup error: {e}")
+
+#@app.before_request
+#def require_login():
     # Completely disable auth for now
-    return None
+    #return None
 
 # Routes
 @app.route('/health')
