@@ -44,6 +44,36 @@ def require_login():
 def health_check():
     return {"status": "healthy", "timestamp": "2025-06-24"}, 200
 
+@app.route('/debug/lti')
+def debug_lti():
+    import os
+    import json
+    
+    debug_info = {}
+    
+    # Check if LTI config files exist
+    lti_config_path = os.path.join(os.path.dirname(__file__), 'lti', 'config.json')
+    jwks_path = os.path.join(os.path.dirname(__file__), 'lti', 'jwks.json')
+    
+    debug_info['lti_config_exists'] = os.path.exists(lti_config_path)
+    debug_info['jwks_exists'] = os.path.exists(jwks_path)
+    debug_info['lti_config_path'] = lti_config_path
+    debug_info['jwks_path'] = jwks_path
+    
+    # Check environment variables
+    debug_info['client_id'] = os.getenv('LTI_CLIENT_ID', 'NOT SET')
+    debug_info['deployment_id'] = os.getenv('LTI_DEPLOYMENT_ID', 'NOT SET')
+    
+    # Try to read config if it exists
+    if os.path.exists(lti_config_path):
+        try:
+            with open(lti_config_path, 'r') as f:
+                debug_info['lti_config_content'] = json.load(f)
+        except Exception as e:
+            debug_info['lti_config_error'] = str(e)
+    
+    return debug_info
+
 @app.route('/')
 def dashboard():
     # Check if this is an LTI launch

@@ -1,0 +1,18 @@
+{
+  "https://uvadlo-dev.instructure.com": [
+    {
+      "default": true,
+      "client_id": "104400000000000323",
+      "auth_login_url": "https://uvadlo-dev.instructure.com/api/lti/authorize_redirect",
+      "auth_token_url": "https://uvadlo-dev.instructure.com/login/oauth2/token",
+      "auth_audience": null,
+      "key_set_url": "https://uvadlo-dev.instructure.com/api/lti/security/jwks",
+      "key_set": null,
+      "private_key_file": "C:\\git\\UvA\\canvas-test-automation\\app\\lti\\jwks.json",
+      "public_key_file": null,
+      "deployment_ids": [
+        "EFkkYVAH4rEUxG9nUntayfyXD6BA6a6xfAHz7URF7WDtPfUBkxQ69yThQDPBANkm"
+      ]
+    }
+  ]
+}
