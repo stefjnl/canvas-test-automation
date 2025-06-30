@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, session, redirect, url_for, j
 from flask_cors import CORS
 from flask_session import Session
 from app.api.routes import api_bp
+from app.lti.routes import lti_bp
 from app.config import Config
 import os
 from app.lti.config import LTIConfig
