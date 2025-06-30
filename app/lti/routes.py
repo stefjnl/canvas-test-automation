@@ -31,8 +31,8 @@ def config():
     config = {
         "title": "Canvas Test Automation Tool",
         "description": "Automated test environment setup for Canvas",
-        "oidc_initiation_url": url_for('lti.login', _external=True),
-        "target_link_uri": url_for('lti.launch', _external=True),
+        "oidc_initiation_url": url_for('lti.login', _external=True, _scheme='https'),
+        "target_link_uri": url_for('lti.launch', _external=True, _scheme='https'),
         "scopes": [
             "https://purl.imsglobal.org/spec/lti/scope/lineitem",
             "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem.readonly",
@@ -51,14 +51,14 @@ def config():
                     "message_type": "LtiResourceLinkRequest",
                     "text": "Test Automation",
                     "enabled": True,
-                    "icon_url": url_for('static', filename='icon.png', _external=True),
-                    "target_link_uri": url_for('lti.launch', _external=True),
+                    "icon_url": url_for('static', filename='icon.png', _external=True, _scheme='https'),
+                    "target_link_uri": url_for('lti.launch', _external=True, _scheme='https'),
                     "canvas_icon_class": "icon-lti"
                 }]
             },
             "privacy_level": "public"
         }],
-        "public_jwk_url": url_for('lti.jwks', _external=True),
+        "public_jwk_url": url_for('lti.jwks', _external=True, _scheme='https'),
         "custom_fields": {
             "canvas_user_id": "$Canvas.user.id",
             "canvas_user_name": "$Person.name.full",
@@ -83,7 +83,7 @@ def login():
     )
     
     try:
-        target_link_uri = url_for('lti.launch', _external=True)
+        target_link_uri = url_for('lti.launch', _external=True, _scheme='https')
         return oidc_login.enable_check_cookies().redirect(target_link_uri)
     except Exception as e:
         return jsonify({"error": str(e)}), 400
@@ -158,7 +158,7 @@ def login():
             launch_data_storage=launch_data_storage
         )
         
-        target_link_uri = url_for('lti.launch', _external=True)
+        target_link_uri = url_for('lti.launch', _external=True, _scheme='https')
         return oidc_login.enable_check_cookies().redirect(target_link_uri)
         
     except Exception as e:
