@@ -149,6 +149,21 @@ def new_request():
     return render_template('request.html',
                          lti_mode=check_lti_session())
 
+# for debugging
+@app.route('/debug/config')
+def debug_config():
+    """Debug LTI configuration"""
+    if not app.config.get('DEBUG', True):
+        return "Debug disabled", 403
+    
+    config_path = os.path.join(os.path.dirname(__file__), 'lti', 'config.json')
+    try:
+        with open(config_path, 'r') as f:
+            config = json.load(f)
+        return jsonify(config)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/requests')
 def requests_list():
     return render_template('requests_list.html')

@@ -130,3 +130,37 @@ def close():
     """Close the LTI tool and return to Canvas"""
     session.clear()
     return render_template('lti_close.html')
+
+@lti_bp.route('/login', methods=['GET', 'POST'])
+def login():
+    """LTI 1.3 login initiation with debugging"""
+    print("=== CANVAS LOGIN REQUEST ===")
+    print(f"Method: {request.method}")
+    print(f"URL: {request.url}")
+    print(f"Args: {dict(request.args)}")
+    print(f"Form: {dict(request.form)}")
+    print(f"Headers: {dict(request.headers)}")
+    
+    # Check what issuer Canvas is sending
+    iss = request.args.get('iss') or request.form.get('iss')
+    print(f"Canvas Issuer (iss): {iss}")
+    print(f"Our Platform URL: {os.getenv('CANVAS_PLATFORM_URL')}")
+    print("============================")
+    
+    try:
+        tool_conf = LTIConfig.create_tool_conf()
+        launch_data_storage = get_launch_data_storage()
+        flask_request = FlaskRequest()
+        
+        oidc_login = FlaskOIDCLogin(
+            flask_request,
+            tool_conf,
+            launch_data_storage=launch_data_storage
+        )
+        
+        target_link_uri = url_for('lti.launch', _external=True)
+        return oidc_login.enable_check_cookies().redirect(target_link_uri)
+        
+    except Exception as e:
+        print(f"❌ Login error: {str(e)}")
+        return jsonify({"error": str(e), "canvas_issuer": iss, "our_platform": os.getenv('CANVAS_PLATFORM_URL')}), 400
