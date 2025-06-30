@@ -4,50 +4,30 @@ from flask_session import Session
 from app.api.routes import api_bp
 from app.config import Config
 import os
-import json
-from pylti1p3.tool_config import ToolConfJsonFile
-from pylti1p3.registration import Registration
+from app.lti.config import LTIConfig
 
-class LTIConfig:
-    @staticmethod
-    def get_lti_config_path():
-        return os.path.join(os.path.dirname(__file__), 'config.json')
+def ensure_lti_config():
+    """Ensure LTI config exists on Railway"""
+    config_path = os.path.join(os.path.dirname(__file__), 'lti', 'config.json')
     
-    @staticmethod
-    def get_private_key():
-        """Get private key from environment variable"""
-        return os.getenv('LTI_PRIVATE_KEY')
-    
-    @staticmethod
-    def create_tool_conf():
-        return ToolConfJsonFile(LTIConfig.get_lti_config_path())
-    
-    @staticmethod
-    def setup_lti_config(client_id, deployment_id, platform_url, auth_url, token_url, jwks_url):
-        """Create the LTI configuration file"""
-        config = {
-            platform_url: [{
-                "default": True,
-                "client_id": client_id,
-                "auth_login_url": auth_url,
-                "auth_token_url": token_url,
-                "auth_audience": None,
-                "key_set_url": jwks_url,
-                "key_set": None,
-                "private_key": LTIConfig.get_private_key(),  # Use environment variable
-                "public_key_file": None,
-                "deployment_ids": [deployment_id]
-            }]
-        }
-        
-        config_path = LTIConfig.get_lti_config_path()
-        os.makedirs(os.path.dirname(config_path), exist_ok=True)
-        
-        with open(config_path, 'w') as f:
-            json.dump(config, f, indent=2)
-        
-        return config
-    
+    # Always recreate config to use latest environment variables
+    print("🔧 Creating LTI config.json...")
+    try:
+        LTIConfig.setup_lti_config(
+            client_id=os.getenv('LTI_CLIENT_ID'),
+            deployment_id=os.getenv('LTI_DEPLOYMENT_ID'),
+            platform_url=os.getenv('CANVAS_PLATFORM_URL'),
+            auth_url=os.getenv('CANVAS_AUTH_URL'),
+            token_url=os.getenv('CANVAS_TOKEN_URL'),
+            jwks_url=os.getenv('CANVAS_JWKS_URL')
+        )
+        print("✅ LTI config created successfully")
+    except Exception as e:
+        print(f"❌ Failed to create LTI config: {e}")
+
+# Call this when the app starts (add after creating the Flask app)
+ensure_lti_config()
+
 # Create Flask app
 app = Flask(__name__)
 app.config.from_object(Config)
