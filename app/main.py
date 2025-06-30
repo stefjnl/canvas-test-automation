@@ -4,7 +4,20 @@ from flask_session import Session
 from app.api.routes import api_bp
 from app.config import Config
 import os
+from app.lti.config import LTIConfig
 
+# Initialize LTI config if it doesn't exist
+config_path = os.path.join(os.path.dirname(__file__), 'lti', 'config.json')
+if not os.path.exists(config_path):
+    LTIConfig.setup_lti_config(
+        client_id=os.getenv('LTI_CLIENT_ID'),
+        deployment_id=os.getenv('LTI_DEPLOYMENT_ID'),
+        platform_url=os.getenv('CANVAS_PLATFORM_URL'),
+        auth_url=os.getenv('CANVAS_AUTH_URL'), 
+        token_url=os.getenv('CANVAS_TOKEN_URL'),
+        jwks_url=os.getenv('CANVAS_JWKS_URL')
+    )
+    
 # Create Flask app
 app = Flask(__name__)
 app.config.from_object(Config)

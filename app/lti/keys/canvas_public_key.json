@@ -1,0 +1,8 @@
+{
+  "kty": "RSA",
+  "use": "sig",
+  "alg": "RS256",
+  "kid": "canvas-lti-25cfc720",
+  "n": "q3-wc3EEYVHC1Lc9MJgMcKKHoNZSuynMIRo3QTbYLKr95D0UI0ulmfxAYcARlC9NVhCRnuvsZ_K6XTwfGwpEKQrGdQxIUkmsP_9VXsl_6gVlS8mDdUrPEciuv2q0udtB4sqpmqOYvfxgO-lZygdje4BfZi0pfKQVdJVTDjEcblKVpGmRjoqT1KLofsv9n8sOu6_LpWDythnaVc-mwMXcUkWNoDdEeVSuCdGK6QSoykPCw7N-FhokufrL7UTUAbZa1ACEF2x8aKyUASnEFofs-LRBI_NTulQl0wtKHvaLLd2X-qUP0dvfredn_2upX6zX6lQiSOJU0n-V91TVpWycQw",
+  "e": "AQAB"
+}
