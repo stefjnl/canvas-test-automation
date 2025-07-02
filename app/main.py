@@ -15,8 +15,12 @@ def ensure_lti_config():
     """Ensure LTI config exists on Railway"""
     config_path = os.path.join(os.path.dirname(__file__), 'lti', 'config.json')
     
-    # Always recreate config to use latest environment variables
-    print("🔧 Creating LTI config.json...")
+    # Always delete and recreate to pick up environment changes
+    if os.path.exists(config_path):
+        os.remove(config_path)
+        print("🗑️ Deleted old config.json")
+    
+    print("🔧 Creating fresh LTI config.json...")
     try:
         LTIConfig.setup_lti_config(
             client_id=os.getenv('LTI_CLIENT_ID'),
@@ -27,6 +31,8 @@ def ensure_lti_config():
             jwks_url=os.getenv('CANVAS_JWKS_URL')
         )
         print("✅ LTI config created successfully")
+        print(f"Platform URL: {os.getenv('CANVAS_PLATFORM_URL')}")
+        print(f"Deployment ID: {os.getenv('LTI_DEPLOYMENT_ID')}")
     except Exception as e:
         print(f"❌ Failed to create LTI config: {e}")
 
