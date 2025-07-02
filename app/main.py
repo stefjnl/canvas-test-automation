@@ -9,6 +9,8 @@ from app.config import Config
 import os
 from app.lti.config import LTIConfig
 
+# Force Railway redeploy - updated Canvas URLs
+
 def ensure_lti_config():
     """Ensure LTI config exists on Railway"""
     config_path = os.path.join(os.path.dirname(__file__), 'lti', 'config.json')
